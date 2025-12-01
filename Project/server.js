@@ -5,9 +5,9 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
-// =========================
-// استيراد ملفات البيانات
-// =========================
+// =============================
+// Import Data Files
+// =============================
 import images from "./Data/images.js";
 import videos from "./Data/Videos.js";
 import texts from "./Data/texts.js";
@@ -17,13 +17,12 @@ import audios from "./Data/Oudeos.js";
 const app = express();
 app.use(bodyParser.json());
 
-// توكن البوت من Render
 const TOKEN = process.env.BOT_TOKEN;
 const TELEGRAM = `https://api.telegram.org/bot${TOKEN}/`;
 
-// =========================
-// دالة إرسال رسالة كتابية
-// =========================
+// =============================
+// Send Text Message
+// =============================
 async function sendMessage(chatId, text) {
   await axios.post(TELEGRAM + "sendMessage", {
     chat_id: chatId,
@@ -31,9 +30,9 @@ async function sendMessage(chatId, text) {
   });
 }
 
-// =========================
-// دالة إرسال صورة
-// =========================
+// =============================
+// Send Photo
+// =============================
 async function sendPhoto(chatId, url) {
   await axios.post(TELEGRAM + "sendPhoto", {
     chat_id: chatId,
@@ -41,9 +40,9 @@ async function sendPhoto(chatId, url) {
   });
 }
 
-// =========================
-//   فيديو
-// =========================
+// =============================
+// Send Video
+// =============================
 async function sendVideo(chatId, url) {
   await axios.post(TELEGRAM + "sendVideo", {
     chat_id: chatId,
@@ -51,9 +50,9 @@ async function sendVideo(chatId, url) {
   });
 }
 
-// =========================
-//  صوت
-// =========================
+// =============================
+// Send Audio
+// =============================
 async function sendAudio(chatId, url) {
   await axios.post(TELEGRAM + "sendAudio", {
     chat_id: chatId,
@@ -61,9 +60,9 @@ async function sendAudio(chatId, url) {
   });
 }
 
-// =========================
-// نقطة الويبهوك
-// =========================
+// =============================
+// Webhook Endpoint
+// =============================
 app.post("/webhook", async (req, res) => {
   res.sendStatus(200);
 
@@ -74,64 +73,25 @@ app.post("/webhook", async (req, res) => {
     const chatId = msg.chat.id;
     const text = msg.text?.trim();
 
-    //  start
     if (text === "/start") {
-      return sendMessage(chatId, "أهلاً! أرسل أمر أي ملف وسأرسله إليك 🌟");
+      return sendMessage(chatId, "Bot is ready. Send a command.");
     }
 
-    // ============ الصور ============
-    if (images[text]) {
-      return sendPhoto(chatId, images[text]);
-    }
+    if (images[text]) return sendPhoto(chatId, images[text]);
+    if (videos[text]) return sendVideo(chatId, videos[text]);
+    if (audios[text]) return sendAudio(chatId, audios[text]);
+    if (texts[text]) return sendMessage(chatId, texts[text]);
+    if (links[text]) return sendMessage(chatId, links[text]);
 
-    // ============ الفيديوهات ============
-    if (videos[text]) {
-      return sendVideo(chatId, videos[text]);
-    }
-
-    // ============ الصوتيات ============
-    if (audios[text]) {
-      return sendAudio(chatId, audios[text]);
-    }
-
-    // ============ النصوص ============
-    if (texts[text]) {
-      return sendMessage(chatId, texts[text]);
-    }
-
-    // ============ الروابط ============
-    if (links[text]) {
-      return sendMessage(chatId, links[text]);
-    }
-
-    // 
-    sendMessage(chatId, "الأمر غير معروف ❌");
-  } catch (err) {
-    console.log("Error:", err);
+    sendMessage(chatId, "Unknown command.");
+  } catch (error) {
+    console.log("Error:", error);
   }
 });
 
-// =========================
-// 
-// =========================
+// =============================
+// Run Server
+// =============================
 app.listen(3000, () => {
   console.log("Bot server is running...");
 });
-
-
----
-
-
-
-1️⃣ ملفات المحتوى (مجلد Data)
-
-مثلاً داخل:
-
-Project/Data/images.js
-
-اجعله هكذا:
-
-export default {
-  "/img1": "https://raw.githubusercontent.com/USER/REPO/main/Project/images/photo1.jpg",
-  "/cat": "https://raw.githubusercontent.com/USER/REPO/main/Project/images/cat.png",
-};
